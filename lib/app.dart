@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: darkMode,
         title: 'DOST-FPRDI Tracker',
-        home: NavigationPagePush(),
+        home: SplashScreen(),
         routes: {
           '/splash': (context) => const SplashScreen(),
           '/login': (context) => const LoginPage(),

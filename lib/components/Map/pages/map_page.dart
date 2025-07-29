@@ -89,6 +89,7 @@ class _MapPageState extends State<MapPage> {
       if (!mounted) return;
       setState(() {});
     });
+    zoomToPhilippinesExtent();
   }
 
   Future<LatLng?> fetchLatLngFromAddress(String address) async {
@@ -306,7 +307,10 @@ class _MapPageState extends State<MapPage> {
 
     // Optional: Zoom out a bit after restoring
     _mapController?.animateCamera(
-      CameraUpdate.zoomTo(6), // Adjust zoom level as you want
+      CameraUpdate.newLatLngZoom(
+        const LatLng(12.8797, 121.7740), // center
+        5.8, // zoom
+      ),
     );
   }
 
@@ -901,6 +905,11 @@ class _MapPageState extends State<MapPage> {
                     ),
                     zoomControlsEnabled: false,
                     zoomGesturesEnabled: false,
+                    myLocationButtonEnabled: false, // "my location" button
+                    compassEnabled: false, // compass arrow
+                    mapToolbarEnabled: false, // Android place toolbar
+                    indoorViewEnabled: false, // indoor level picker
+                    trafficEnabled: false,
                     mapType: MapType.hybrid,
                     onMapCreated: (GoogleMapController controller) async {
                       _mapController = controller;
@@ -991,6 +1000,16 @@ class _MapPageState extends State<MapPage> {
                             selectedCity = null;
                             cities.clear();
                             provinces.clear();
+                            if (selectedRegion == null) {
+                              _polygons
+                                  .clear(); // Clear polygons when region is deselected
+                              _mapController?.animateCamera(
+                                CameraUpdate.newLatLngZoom(
+                                  const LatLng(12.8797, 121.7740), // center
+                                  5.8, // zoom
+                                ),
+                              );
+                            }
                           });
                           if (value != null) {
                             updateProvinces(value);
@@ -1010,6 +1029,16 @@ class _MapPageState extends State<MapPage> {
                                 selectedProvince == value ? null : value;
                             selectedCity = null;
                             cities.clear();
+                            if (selectedProvince == null) {
+                              _polygons
+                                  .clear(); // Clear polygons when province is deselected
+                              _mapController?.animateCamera(
+                                CameraUpdate.newLatLngZoom(
+                                  const LatLng(12.8797, 121.7740), // center
+                                  5.8, // zoom
+                                ),
+                              );
+                            }
                           });
                           if (value != null) {
                             updateCities(value);
@@ -1025,6 +1054,16 @@ class _MapPageState extends State<MapPage> {
                           print('City changed: $value'); // Debug log
                           setState(() {
                             selectedCity = selectedCity == value ? null : value;
+                            if (selectedCity == null) {
+                              _polygons
+                                  .clear(); // Clear polygons when city is deselected
+                              _mapController?.animateCamera(
+                                CameraUpdate.newLatLngZoom(
+                                  const LatLng(12.8797, 121.7740), // center
+                                  5.8, // zoom
+                                ),
+                              );
+                            }
                           });
                           if (value != null && selectedProvince != null) {
                             zoomToCityExtent(selectedProvince!, value);

@@ -15,29 +15,45 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  //get auth services
+  // get auth services
   final authService = AuthService();
 
-  //text editing controller
+  // text editing controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  //login method
-  void login() async {
-    //prepare data
+  // ✅ local loading flag
+  bool _isLoading = false;
+
+  // login method
+  Future<void> login() async {
     final String email = emailController.text.trim();
     final String pw = passwordController.text.trim();
 
-    final authCubit = context.read<AuthCubit>();
+    if (email.isEmpty || pw.isEmpty) {
+      displayMessageToUser("Please enter both email and password", context);
+      return;
+    }
 
-    if (email.isNotEmpty && pw.isNotEmpty) {
-      //login!
+    setState(() => _isLoading = true);
+
+    try {
+      final authCubit = context.read<AuthCubit>();
       await authCubit.login(email, pw);
+
+      if (!mounted) return;
+
       if (authCubit.state is Authenticated) {
         Navigator.popUntil(context, ModalRoute.withName('/'));
+      } else if (authCubit.state is AuthError) {
+        final msg = (authCubit.state as AuthError).message;
+        displayMessageToUser(msg, context);
       }
-    } else {
-      displayMessageToUser("Please enter both email and password", context);
+    } catch (e) {
+      if (!mounted) return;
+      displayMessageToUser("Login failed. Please try again.", context);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -53,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Stack(
         children: [
-          //the pic
+          // the pic
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -62,18 +78,16 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          //Pang opaque
-          Container(
-            color: Colors.black.withOpacity(0),
-          ),
-          //container for the fields and button
+          // Pang opaque
+          Container(color: Colors.black.withOpacity(0)),
+          // container for the fields and button
           Center(
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.grey.withOpacity(0.85),
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 8,
@@ -84,61 +98,74 @@ class _LoginPageState extends State<LoginPage> {
               constraints: const BoxConstraints(maxWidth: 400),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      'assets/images/FPRDILOGO.png',
-                      height: 200,
-                    ),
-                    const SizedBox(height: 20),
-                    //email textfield
-                    MyTextfield(
-                      hintText: "Email",
-                      obscureText: false,
-                      controller: emailController,
-                    ),
-                    const SizedBox(height: 10),
-                    //password textfield
-                    MyTextfield(
-                      hintText: "Password",
-                      obscureText: true,
-                      controller: passwordController,
-                      maxLines: 1,
-                    ),
-                    const SizedBox(height: 10),
-                    //forgot password
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 5.0),
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).pushNamed('/forgot_password');
-                            },
-                            child: Text(
-                              "Forgot Password",
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.tertiary,
+                // ✅ prevent interactions while loading (optional)
+                child: AbsorbPointer(
+                  absorbing: _isLoading,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset('assets/images/FPRDILOGO.png', height: 200),
+                      const SizedBox(height: 20),
+
+                      // email textfield
+                      MyTextfield(
+                        hintText: "Email",
+                        obscureText: false,
+                        controller: emailController,
+                      ),
+                      const SizedBox(height: 10),
+
+                      // password textfield
+                      MyTextfield(
+                        hintText: "Password",
+                        obscureText: true,
+                        controller: passwordController,
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 10),
+
+                      // forgot password
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 5.0),
+                            child: GestureDetector(
+                              onTap: _isLoading
+                                  ? null
+                                  : () {
+                                      Navigator.of(context)
+                                          .pushNamed('/forgot_password');
+                                    },
+                              child: Text(
+                                "Forgot Password",
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.tertiary,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 45),
-                    //sign in button  
-                    MyButton(
-                      text: "Login",
-                      onTap: login,
-                    ),
-                    const SizedBox(height: 10),
-                  ],
+                        ],
+                      ),
+
+                      const SizedBox(height: 45),
+
+                      // ✅ sign in button with loading
+                      MyButton(
+                        text: _isLoading ? "" : "Login",
+                        onTap: _isLoading ? null : login,
+                        isLoading: _isLoading, // <— add this prop in MyButton
+                      ),
+
+                      const SizedBox(height: 10),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
+
         ],
       ),
     );
