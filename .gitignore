@@ -176,3 +176,13 @@ ios/Pods/
 android/.gradle/
 **/*.keystore
 **/*.jks
+.env
+.env*
+.dart_tool/
+build/
+\.packages
+pubspec.lock
+ios/Pods/
+android/.gradle/
+**/*.keystore
+**/*.jks
