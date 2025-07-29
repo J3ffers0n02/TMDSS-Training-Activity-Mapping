@@ -1,0 +1,55 @@
+name: tmdss
+description: "A new Flutter project."
+publish_to: 'none'
+
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  location_picker_flutter_map: ^1.1.0
+  city_picker_from_map: ^0.0.1
+  google_maps_flutter: ^2.12.1
+  go_router: ^15.1.1
+  supabase_flutter: ^2.9.0
+  flutter_map: ^5.0.0
+  latlong2: ^0.9.1
+  flutter_map_geojson: ^1.0.3
+  window_size: ^0.1.0
+  excel: ^4.0.6
+  file_picker: ^10.1.9
+  csv: ^6.0.0
+  dropdown_button2: ^2.3.9
+  provider: ^6.1.5
+  flutter_bloc: ^9.1.1
+  intl: ^0.18.1
+  geocode: ^1.0.3
+  flutter_dotenv: ^5.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_native_splash: ^2.4.4
+
+flutter:
+
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/geojson/
+    - assets/.env
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/images/FPRDILOGO.png
+  android: true
+  ios: true
+  web: true
+
+
